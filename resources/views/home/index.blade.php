@@ -13,6 +13,7 @@
             <img class="cover" ng-src="covers/@{{book.slug}}.jpg">
             <span class="title">@{{book.title}}</span>
             <rating ng-model="book.average_rate" max="rating.max" readonly="rating.isReadonly"></rating>
+            <a href="epubs/@{{book.slug}}.epub" class="pull-right"><span class="glyphicon glyphicon-download-alt"></span></a>
         </li>
     </ul>
 @stop

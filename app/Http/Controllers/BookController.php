@@ -17,11 +17,11 @@ class BookController extends KoobeController
     {
         self::notFoundIfNull($slug);
 
-        $coverFileName = storage_path(Book::COVERS_DIRECTORY . DIRECTORY_SEPARATOR . $slug . ".jpg");
+        $coverFilePath = storage_path(Book::COVERS_DIRECTORY . DIRECTORY_SEPARATOR . $slug . ".jpg");
         $noCoverFileName = storage_path(Book::COVERS_DIRECTORY . DIRECTORY_SEPARATOR . Book::NO_COVER_FILE . ".jpg");
 
-        if (File::exists($coverFileName)) {
-            $cover = Image::make($coverFileName);
+        if (File::exists($coverFilePath)) {
+            $cover = Image::make($coverFilePath);
         } else if (File::exists($noCoverFileName)) {
             $cover = Image::make($noCoverFileName);
         } else {
@@ -29,6 +29,21 @@ class BookController extends KoobeController
         }
 
         return $cover->response();
+    }
+
+    public function download($slug)
+    {
+        self::notFoundIfNull($slug);
+
+        $epubFilePath = storage_path(Book::EPUBS_DIRECTORY . DIRECTORY_SEPARATOR . $slug . ".epub");
+
+        if (File::exists($epubFilePath)) {
+            $response = response()->download($epubFilePath);
+        } else {
+            abort(404);
+        }
+
+        return $response;
     }
 
     public function get()
