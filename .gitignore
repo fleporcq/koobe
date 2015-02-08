@@ -1,0 +1,9 @@
+/vendor
+/node_modules
+/bower_components
+/storage/covers
+/storage/epubs
+*.iml
+/.idea
+/public/assets
+.env
