@@ -29,7 +29,7 @@
         ul#books > li {
             width: 16%;
             min-width: 150px;
-
+            word-wrap: break-word;
         }
         ul#books > li:hover {
             transition: all .2s ease-in-out;
