@@ -88,6 +88,14 @@ class Initial extends Migration {
 			$table->timestamps();
 		});
 
+        Schema::create('downloads', function($table)
+        {
+            $table->integer('book_id')->unsigned();
+            $table->foreign('book_id')->references('id')->on('books');
+            $table->integer('user_id')->unsigned();
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->dateTime('downloaded_at');
+        });
 
 	}
 
@@ -107,6 +115,8 @@ class Initial extends Migration {
 		Schema::drop('themes');
 
 		Schema::drop('rates');
+
+		Schema::drop('downloads');
 
 		Schema::drop('books');
 
