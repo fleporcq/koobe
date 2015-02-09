@@ -2,6 +2,7 @@
 
 use App\Commands\ParseBook;
 use App\Models\Book;
+use App\Models\Download;
 use File;
 use Flow;
 use Illuminate\Encryption\Encrypter;
@@ -37,7 +38,13 @@ class BookController extends KoobeController
 
         $epubFilePath = storage_path(Book::EPUBS_DIRECTORY . DIRECTORY_SEPARATOR . $slug . ".epub");
 
+        $book = Book::bySlug($slug);
+
+        self::notFoundIfNull($book);
+
         if (File::exists($epubFilePath)) {
+            $download = new Download($book->id, $this->connectedUser->id);
+            $download->save();
             $response = response()->download($epubFilePath);
         } else {
             abort(404);
