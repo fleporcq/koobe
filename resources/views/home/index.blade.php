@@ -8,6 +8,14 @@
 	)
 ))
 @section('content')
+
+    <div id="search" class="input-group">
+        <input type="text" name="terms" class="form-control input-lg" placeholder="@lang('messages.home.search')">
+        <span class="input-group-btn">
+            <button class="btn btn-primary input-lg" type="button"><span class="glyphicon glyphicon-search"></span></button>
+        </span>
+    </div>
+
     <ul id="books" masonry="">
         <li ng-repeat="book in books" class="masonry-brick well">
             <img class="cover" ng-src="covers/@{{book.slug}}.jpg">
@@ -17,6 +25,7 @@
         </li>
     </ul>
     <div id="loading" class="well" ng-hide="!loadingMore"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>&nbsp;@lang('messages.home.loading')</div>
+
 @stop
 
 @section('styles')
@@ -76,6 +85,10 @@
         @keyframes spin {
             from { transform: scale(1) rotate(0deg);}
             to { transform: scale(1) rotate(360deg);}
+        }
+        #search{
+            width:60%;
+            margin:20px auto;
         }
     </style>
 @stop

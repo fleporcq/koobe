@@ -12,6 +12,7 @@ return [
         'logout' => 'Déconnexion',
     ],
     'home' => [
+        'search' => 'Titre, auteur',
         'loading' => 'Chargement en cours...'
     ],
     'uploader' => [
