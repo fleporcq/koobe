@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Author whereSlug($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Author whereCreatedAt($value)
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Author whereUpdatedAt($value)
+ * @method static \App\Models\Author whereToken($slug)
  */
 class Author extends Model
 {
