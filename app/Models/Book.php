@@ -72,4 +72,9 @@ class Book extends Model
     {
         return $query->whereSlug($slug)->first();
     }
+
+    public function scopeSearch($query, $terms){
+       // return $query->where('title', 'LIKE', "%$terms%")->whereEnabled(true);
+        return $query->whereEnabled(true)->whereRaw("MATCH(title) AGAINST(? IN BOOLEAN MODE)", array("$terms"));
+    }
 }

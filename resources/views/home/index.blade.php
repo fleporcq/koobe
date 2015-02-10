@@ -9,12 +9,15 @@
 ))
 @section('content')
 
-    <div id="search" class="input-group">
-        <input type="text" name="terms" class="form-control input-lg" placeholder="@lang('messages.home.search')">
-        <span class="input-group-btn">
-            <button class="btn btn-primary input-lg" type="button"><span class="glyphicon glyphicon-search"></span></button>
-        </span>
-    </div>
+    <form ng-submit="search()">
+        <div id="terms" class="input-group">
+            <input type="text" ng-model="criteria.terms" class="form-control input-lg" placeholder="@lang('messages.home.search')">
+            <span class="input-group-btn">
+                <button class="btn btn-primary input-lg" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+            </span>
+        </div>
+        <pre>@{{criteria}}</pre>
+    </form>
 
     <ul id="books" masonry="">
         <li ng-repeat="book in books" class="masonry-brick well">
@@ -86,7 +89,7 @@
             from { transform: scale(1) rotate(0deg);}
             to { transform: scale(1) rotate(360deg);}
         }
-        #search{
+        #terms{
             width:60%;
             margin:20px auto;
         }
@@ -104,21 +107,39 @@
 
 
         koobeApp.controller('BooksCtrl', function ($scope, $http, $timeout) {
-            $scope.books = [];
-            $scope.loadingMore = false;
-            $scope.page = 1;
-            $scope.lastPage = null;
+
+            $scope.criteria = {};
+
+            $scope.reset = function () {
+                $scope.books = [];
+                $scope.loadingMore = false;
+                $scope.page = 1;
+                $scope.lastPage = null;
+            }
+
             $scope.loadMoreBooks = function () {
                 if ($scope.lastPage == null || $scope.page < $scope.lastPage && !$scope.loadingMore) {
                     $scope.loadingMore = true;
-                    $timeout(function(){$http.get('books?page=' + $scope.page).success(function (page) {
-                        $scope.books = $scope.books.concat(page.data);
-                        $scope.lastPage = page.last_page;
-                        $scope.loadingMore = false;
-                        $scope.page++;
-                    });}, $scope.page > 1 ? 500 : 0);
+                    $timeout(function(){
+                        $http.post("{{ URL::action('BookController@get') }}",{
+                            page: $scope.page,
+                            terms: $scope.criteria.terms
+                        }).success(function (page) {
+                            $scope.books = $scope.books.concat(page.data);
+                            $scope.lastPage = page.last_page;
+                            $scope.loadingMore = false;
+                            $scope.page++;
+                        });
+                    }, $scope.page > 1 ? 500 : 0);
                 }
             }
+
+            $scope.search = function () {
+                $scope.reset();
+                $scope.loadMoreBooks();
+            }
+
+            $scope.reset();
 
             $scope.loadMoreBooks();
 
