@@ -74,9 +74,9 @@ class Book extends Model
         return $query->whereSlug($slug)->first();
     }
 
-    public function scopeSearch($query, $search)
+    public function scopeSearch($query, $terms)
     {
-        $search = $this->prepareFullTextQuery($search);
+        $terms = $this->prepareFullTextQuery($terms);
         return Book::distinct()->select(
             'books.*',
             DB::raw('3 * (MATCH(title) AGAINST(? IN BOOLEAN MODE)) as title_score'),
@@ -84,33 +84,34 @@ class Book extends Model
             DB::raw('2 * (MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)) as author_score'),
             DB::raw('2 * (MATCH(themes.name) AGAINST(? IN BOOLEAN MODE)) as theme_score')
         )
-
             ->leftJoin('author_book', 'author_book.book_id', '=', 'books.id')
             ->leftJoin('authors', 'authors.id', '=', 'author_book.author_id')
             ->leftJoin('book_theme', 'book_theme.book_id', '=', 'books.id')
             ->leftJoin('themes', 'themes.id', '=', 'book_theme.theme_id')
-            ->whereRaw('MATCH(title) AGAINST(? IN BOOLEAN MODE)')
-            ->orWhereRaw('MATCH(description) AGAINST(? IN BOOLEAN MODE)')
-            ->orWhereRaw('MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)')
-            ->orWhereRaw('MATCH(themes.name) AGAINST(? IN BOOLEAN MODE)')
+            ->where(function ($query) {
+                $query->whereRaw('MATCH(title) AGAINST(? IN BOOLEAN MODE)')
+                    ->orWhereRaw('MATCH(description) AGAINST(? IN BOOLEAN MODE)')
+                    ->orWhereRaw('MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)')
+                    ->orWhereRaw('MATCH(themes.name) AGAINST(? IN BOOLEAN MODE)');
+            })
             ->orderByRaw('title_score + description_score + author_score + theme_score DESC')
             ->groupBy('books.id')
-            ->setBindings(array("$search", "$search", "$search", "$search", "$search", "$search", "$search", "$search"));
+            ->setBindings(["$terms", "$terms", "$terms", "$terms", "$terms", "$terms", "$terms", "$terms"]);
     }
 
     /**
      * @param $search
      * @return string
      */
-    private function prepareFullTextQuery($search)
+    private function prepareFullTextQuery($phrase)
     {
-        $terms = explode(" ", $search);
+        $terms = explode(" ", $phrase);
         foreach ($terms as $key => $term) {
             if (strlen($term) > 3) {
                 $terms[$key] .= "*";
             }
         }
-        $search = implode(" ", $terms);
-        return $search;
+        $phrase = implode(" ", $terms);
+        return $phrase;
     }
 }

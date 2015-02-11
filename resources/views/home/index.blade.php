@@ -9,16 +9,22 @@
 ))
 @section('content')
 
-    <form ng-submit="search.search()">
-        <div id="terms" class="input-group">
-            <input type="text" ng-model="search.terms" class="form-control input-lg" placeholder="@lang('messages.home.search')">
-            <span class="input-group-btn">
-                <button class="btn btn-primary input-lg" type="submit"><span class="glyphicon glyphicon-search"></span></button>
-            </span>
-        </div>
+    <form ng-submit="search.search()" id="search" class="input-group">
+        <input type="text" ng-model="search.terms" class="form-control input-lg" placeholder="@lang('messages.home.search')">
+        <span class="input-group-btn" id="themes">
+            <select class="form-control input-lg" ng-model="search.theme" ng-change="search.search()">
+                <option value="">@lang('messages.home.theme')</option>
+                @foreach($themes as $theme)
+                    <option value="{{ $theme->id }}">{{ $theme->name }}</option>
+                @endforeach
+            </select>
+        </span>
+        <span class="input-group-btn" id="button">
+            <button class="btn btn-default input-lg" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+        </span>
     </form>
 
-    <ul id="books" masonry="" preserve-order>
+    <ul id="books" masonry="" ng-hide="books.length == 0" reload-on-show>
         <li ng-repeat="book in books" class="masonry-brick well">
             <img class="cover" ng-src="covers/@{{book.slug}}.jpg">
             <span class="title">@{{book.title}}</span>
@@ -28,7 +34,7 @@
     </ul>
 
     <div id="loading" class="well" ng-hide="!loadingMore"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>&nbsp;@lang('messages.home.loading')</div>
-    <div id="no-results" class="well" ng-show="books.length == 0">@lang('messages.home.noResults')</div>
+    <div id="no-results" class="well" ng-show="!loadingMore && books.length == 0">@lang('messages.home.noResults')</div>
 
 @stop
 
@@ -96,9 +102,12 @@
             from { transform: scale(1) rotate(0deg);}
             to { transform: scale(1) rotate(360deg);}
         }
-        #terms{
+        #search {
             width:60%;
             margin:20px auto;
+        }
+        #search #themes {
+            width:20%;
         }
     </style>
 @stop
@@ -115,8 +124,6 @@
 
         koobeApp.controller('BooksCtrl', function ($scope, $http, $timeout) {
 
-            $scope.criteria = {};
-
             $scope.reset = function () {
                 $scope.books = [];
                 $scope.loadingMore = false;
@@ -130,7 +137,8 @@
                     $timeout(function(){
                         $http.post("{{ URL::action('BookController@get') }}",{
                             page: $scope.page,
-                            terms: $scope.criteria.terms
+                            terms: $scope.criteria.terms,
+                            theme: $scope.criteria.theme
                         }).success(function (page) {
                             $scope.books = $scope.books.concat(page.data);
                             $scope.lastPage = page.last_page;
@@ -144,6 +152,7 @@
             $scope.criteria = {};
             $scope.search.search = function () {
                 $scope.criteria.terms = $scope.search.terms;
+                $scope.criteria.theme = $scope.search.theme;
                 $scope.reset();
                 $scope.loadMoreBooks();
             }

@@ -105,23 +105,23 @@ class Initial extends Migration {
 	 */
 	public function down()
 	{
-		Schema::drop('author_book');
+		Schema::dropIfExists('author_book');
 
-		Schema::drop('authors');
+		Schema::dropIfExists('authors');
 
-		Schema::drop('book_theme');
+		Schema::dropIfExists('book_theme');
 
-		Schema::drop('themes');
+		Schema::dropIfExists('themes');
 
-		Schema::drop('rates');
+		Schema::dropIfExists('rates');
 
-		Schema::drop('downloads');
+		Schema::dropIfExists('downloads');
 
-		Schema::drop('books');
+		Schema::dropIfExists('books');
 
-		Schema::drop('languages');
+		Schema::dropIfExists('languages');
 
-		Schema::drop('users');
+		Schema::dropIfExists('users');
 
 	}
 

@@ -56,9 +56,16 @@ class BookController extends KoobeController
     public function get(Request $request)
     {
         $terms = trim($request->input("terms"));
+        $themeId = $request->input("theme");
         $books = Book::with('authors', 'themes');
-        if(!empty($terms)){
+        if (!empty($terms)) {
             $books = $books->search($terms);
+        }
+        if (!empty($themeId)) {
+            if(empty($terms)){
+                $books = $books->leftJoin('book_theme', 'book_theme.book_id', '=', 'books.id');
+            }
+            $books->where("book_theme.theme_id", "=", $themeId);
         }
         $books = $books->whereEnabled(true)->paginate(15);
         return Response::json($books);
@@ -73,9 +80,9 @@ class BookController extends KoobeController
     {
         $flowRequest = new Flow\Request();
         $destination = storage_path('/epubs/' . uniqid() . '.epub');
-        $config = new Flow\Config(array(
+        $config = new Flow\Config([
             'tempDir' => storage_path('/epubs/chunks')
-        ));
+        ]);
         $file = new Flow\File($config, $flowRequest);
         $response = Response::make('', 200);
 
