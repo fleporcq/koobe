@@ -9,14 +9,13 @@
 ))
 @section('content')
 
-    <form ng-submit="search()">
+    <form ng-submit="search.search()">
         <div id="terms" class="input-group">
-            <input type="text" ng-model="criteria.terms" class="form-control input-lg" placeholder="@lang('messages.home.search')">
+            <input type="text" ng-model="search.terms" class="form-control input-lg" placeholder="@lang('messages.home.search')">
             <span class="input-group-btn">
                 <button class="btn btn-primary input-lg" type="submit"><span class="glyphicon glyphicon-search"></span></button>
             </span>
         </div>
-        <pre>@{{criteria}}</pre>
     </form>
 
     <ul id="books" masonry="">
@@ -27,7 +26,9 @@
             <a href="epubs/@{{book.slug}}.epub" class="pull-right"><span class="glyphicon glyphicon-download-alt"></span></a>
         </li>
     </ul>
+
     <div id="loading" class="well" ng-hide="!loadingMore"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>&nbsp;@lang('messages.home.loading')</div>
+    <div id="no-results" class="well" ng-show="books.length == 0">@lang('messages.home.noResults')</div>
 
 @stop
 
@@ -69,6 +70,12 @@
             display: block;
         }
         #loading {
+            margin:20px auto;
+            width:60%;
+            text-align:center;
+            font-size:16px;
+        }
+        #no-results {
             margin:20px auto;
             width:60%;
             text-align:center;
@@ -133,8 +140,10 @@
                     }, $scope.page > 1 ? 500 : 0);
                 }
             }
-
-            $scope.search = function () {
+            $scope.search = {};
+            $scope.criteria = {};
+            $scope.search.search = function () {
+                $scope.criteria.terms = $scope.search.terms;
                 $scope.reset();
                 $scope.loadMoreBooks();
             }

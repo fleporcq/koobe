@@ -1,6 +1,7 @@
 <?php namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 
 /**
@@ -73,8 +74,37 @@ class Book extends Model
         return $query->whereSlug($slug)->first();
     }
 
-    public function scopeSearch($query, $terms){
-       // return $query->where('title', 'LIKE', "%$terms%")->whereEnabled(true);
-        return $query->whereEnabled(true)->whereRaw("MATCH(title) AGAINST(? IN BOOLEAN MODE)", array("$terms"));
+    public function scopeSearch($query, $search)
+    {
+        $search = $this->prepareFullTextQuery($search);
+        return Book::select(
+            'books.*',
+            DB::raw('3 * (MATCH(title) AGAINST(? IN BOOLEAN MODE)) as title_score'),
+            DB::raw('1 * (MATCH(description) AGAINST(? IN BOOLEAN MODE)) as description_score'),
+            DB::raw('2 * (MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)) as author_score')
+        )
+            ->leftJoin('author_book', 'author_book.book_id', '=', 'books.id')
+            ->leftJoin('authors', 'authors.id', '=', 'author_book.author_id')
+            ->whereRaw('MATCH(title) AGAINST(? IN BOOLEAN MODE)')
+            ->orWhereRaw('MATCH(description) AGAINST(? IN BOOLEAN MODE)')
+            ->orWhereRaw('MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)')
+            ->orderByRaw('title_score + description_score + author_score DESC')
+            ->setBindings(array("$search", "$search", "$search", "$search", "$search", "$search"));
+    }
+
+    /**
+     * @param $search
+     * @return string
+     */
+    private function prepareFullTextQuery($search)
+    {
+        $terms = explode(" ", $search);
+        foreach ($terms as $key => $term) {
+            if (strlen($term) > 3) {
+                $terms[$key] .= "*";
+            }
+        }
+        $search = implode(" ", $terms);
+        return $search;
     }
 }

@@ -55,8 +55,12 @@ class BookController extends KoobeController
 
     public function get(Request $request)
     {
-        $terms = $request->input("terms");
-        $books = Book::with('authors', 'themes')->search($terms)->paginate(15);
+        $terms = trim($request->input("terms"));
+        $books = Book::with('authors', 'themes');
+        if(!empty($terms)){
+            $books = $books->search($terms);
+        }
+        $books = $books->whereEnabled(true)->paginate(15);
         return Response::json($books);
     }
 

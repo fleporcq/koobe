@@ -12,8 +12,9 @@ return [
         'logout' => 'Déconnexion',
     ],
     'home' => [
-        'search' => 'Titre, auteur',
-        'loading' => 'Chargement en cours...'
+        'search' => 'Titre, description, auteur',
+        'loading' => 'Chargement en cours...',
+        'noResults' => 'Aucun livre ne correspond à votre recherche'
     ],
     'uploader' => [
         'uploadFiles' => 'Transférer des fichiers',
