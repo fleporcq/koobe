@@ -1,6 +1,7 @@
 <?php namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 
 /**
@@ -38,6 +39,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Book whereUpdatedAt($value)
  * @method static \App\Models\Book whereToken($slug)
  * @method static \App\Models\Book bySlug($slug)
+ * @method static \App\Models\Book search($terms)
  */
 class Book extends Model
 {
@@ -71,5 +73,46 @@ class Book extends Model
     public function scopeBySlug($query, $slug)
     {
         return $query->whereSlug($slug)->first();
+    }
+
+    public function scopeSearch($query, $terms)
+    {
+        $terms = $this->prepareFullTextQuery($terms);
+        return Book::distinct()->select(
+            'books.*',
+            DB::raw('3 * (MATCH(title) AGAINST(? IN BOOLEAN MODE)) as title_score'),
+            DB::raw('1 * (MATCH(description) AGAINST(? IN BOOLEAN MODE)) as description_score'),
+            DB::raw('2 * (MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)) as author_score'),
+            DB::raw('2 * (MATCH(themes.name) AGAINST(? IN BOOLEAN MODE)) as theme_score')
+        )
+            ->leftJoin('author_book', 'author_book.book_id', '=', 'books.id')
+            ->leftJoin('authors', 'authors.id', '=', 'author_book.author_id')
+            ->leftJoin('book_theme', 'book_theme.book_id', '=', 'books.id')
+            ->leftJoin('themes', 'themes.id', '=', 'book_theme.theme_id')
+            ->where(function ($query) {
+                $query->whereRaw('MATCH(title) AGAINST(? IN BOOLEAN MODE)')
+                    ->orWhereRaw('MATCH(description) AGAINST(? IN BOOLEAN MODE)')
+                    ->orWhereRaw('MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)')
+                    ->orWhereRaw('MATCH(themes.name) AGAINST(? IN BOOLEAN MODE)');
+            })
+            ->orderByRaw('title_score + description_score + author_score + theme_score DESC')
+            ->groupBy('books.id')
+            ->setBindings(["$terms", "$terms", "$terms", "$terms", "$terms", "$terms", "$terms", "$terms"]);
+    }
+
+    /**
+     * @param $search
+     * @return string
+     */
+    private function prepareFullTextQuery($phrase)
+    {
+        $terms = explode(" ", $phrase);
+        foreach ($terms as $key => $term) {
+            if (strlen($term) > 3) {
+                $terms[$key] .= "*";
+            }
+        }
+        $phrase = implode(" ", $terms);
+        return $phrase;
     }
 }

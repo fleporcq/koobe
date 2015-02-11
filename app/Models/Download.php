@@ -18,7 +18,8 @@ class Download extends Model
 
     public $timestamps = false;
 
-    public function __construct($book_id,$user_id){
+    public function __construct($book_id, $user_id)
+    {
         $this->book_id = $book_id;
         $this->user_id = $user_id;
         $this->downloaded_at = new Carbon();

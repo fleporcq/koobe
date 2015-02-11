@@ -7,12 +7,15 @@ return [
         'loginError' => 'Email ou mot de passe incorrect. '
     ],
     'navbar' => [
-        'home' => 'Livres',
-        'upload' => 'Proposer des livres',
+        'home' => 'Bibliothèque',
+        'upload' => 'Ajouter des livres',
         'logout' => 'Déconnexion',
     ],
     'home' => [
-        'loading' => 'Chargement en cours...'
+        'search' => 'Titre, description, auteur',
+        'loading' => 'Chargement en cours...',
+        'noResults' => 'Aucun livre ne correspond à votre recherche',
+        'theme' => 'Rayon'
     ],
     'uploader' => [
         'uploadFiles' => 'Transférer des fichiers',
