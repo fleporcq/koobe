@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\DB;
  * @method static \Illuminate\Database\Query\Builder|\App\Models\Book whereUpdatedAt($value)
  * @method static \App\Models\Book whereToken($slug)
  * @method static \App\Models\Book bySlug($slug)
+ * @method static \App\Models\Book search($terms)
  */
 class Book extends Model
 {
