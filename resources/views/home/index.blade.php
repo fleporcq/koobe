@@ -18,7 +18,7 @@
         </div>
     </form>
 
-    <ul id="books" masonry="">
+    <ul id="books" masonry="" preserve-order>
         <li ng-repeat="book in books" class="masonry-brick well">
             <img class="cover" ng-src="covers/@{{book.slug}}.jpg">
             <span class="title">@{{book.title}}</span>
