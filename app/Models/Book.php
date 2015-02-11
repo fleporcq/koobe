@@ -77,19 +77,25 @@ class Book extends Model
     public function scopeSearch($query, $search)
     {
         $search = $this->prepareFullTextQuery($search);
-        return Book::select(
+        return Book::distinct()->select(
             'books.*',
             DB::raw('3 * (MATCH(title) AGAINST(? IN BOOLEAN MODE)) as title_score'),
             DB::raw('1 * (MATCH(description) AGAINST(? IN BOOLEAN MODE)) as description_score'),
-            DB::raw('2 * (MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)) as author_score')
+            DB::raw('2 * (MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)) as author_score'),
+            DB::raw('2 * (MATCH(themes.name) AGAINST(? IN BOOLEAN MODE)) as theme_score')
         )
+
             ->leftJoin('author_book', 'author_book.book_id', '=', 'books.id')
             ->leftJoin('authors', 'authors.id', '=', 'author_book.author_id')
+            ->leftJoin('book_theme', 'book_theme.book_id', '=', 'books.id')
+            ->leftJoin('themes', 'themes.id', '=', 'book_theme.theme_id')
             ->whereRaw('MATCH(title) AGAINST(? IN BOOLEAN MODE)')
             ->orWhereRaw('MATCH(description) AGAINST(? IN BOOLEAN MODE)')
             ->orWhereRaw('MATCH(authors.name) AGAINST(? IN BOOLEAN MODE)')
-            ->orderByRaw('title_score + description_score + author_score DESC')
-            ->setBindings(array("$search", "$search", "$search", "$search", "$search", "$search"));
+            ->orWhereRaw('MATCH(themes.name) AGAINST(? IN BOOLEAN MODE)')
+            ->orderByRaw('title_score + description_score + author_score + theme_score DESC')
+            ->groupBy('books.id')
+            ->setBindings(array("$search", "$search", "$search", "$search", "$search", "$search", "$search", "$search"));
     }
 
     /**

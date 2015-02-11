@@ -62,6 +62,7 @@ class Initial extends Migration {
 
 		Schema::create('themes', function($table)
 		{
+            $table->engine = 'MyISAM';
 			$table->increments('id');
 			$table->string('name')->unique();
 			$table->string('slug')->unique();
@@ -72,7 +73,6 @@ class Initial extends Migration {
 		{
 			$table->integer('book_id')->unsigned();
 			$table->integer('theme_id')->unsigned();
-			$table->foreign('theme_id')->references('id')->on('themes');
 		});
 
 		Schema::create('rates', function($table)
@@ -93,6 +93,7 @@ class Initial extends Migration {
         });
 
         DB::statement('ALTER TABLE authors ADD FULLTEXT author_search(name)');
+        DB::statement('ALTER TABLE themes ADD FULLTEXT theme_search(name)');
         DB::statement('ALTER TABLE books ADD FULLTEXT title_search(title)');
         DB::statement('ALTER TABLE books ADD FULLTEXT description_search(description)');
 	}
