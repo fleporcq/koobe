@@ -1,6 +1,6 @@
 <?php namespace App\Http\Controllers;
 
-use App\Commands\ParseBook;
+use App\Commands\PushBook;
 use App\Models\Book;
 use App\Models\Download;
 use File;
@@ -99,7 +99,7 @@ class BookController extends KoobeController
             }
         }
         if ($file->validateFile() && $file->save($destination)) {
-            Queue::push(new ParseBook($destination));
+            Queue::push(new PushBook($destination));
             $response = Response::make('pass some success message to flow.js', 200);
         }
         return $response;

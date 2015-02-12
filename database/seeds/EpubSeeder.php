@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use App\Models\Book;
-use App\Commands\ParseBook;
+use App\Commands\PushBook;
 
 class EpubSeeder extends Seeder
 {
@@ -14,7 +14,7 @@ class EpubSeeder extends Seeder
         $epubs = storage_path(Book::EPUBS_DIRECTORY);
         File::copyDirectory($seeds, $epubs);
         foreach (File::files($epubs) as $epub) {
-            Queue::push(new ParseBook($epub));
+            Queue::push(new PushBook($epub));
 
         }
     }

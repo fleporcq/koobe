@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\File;
 use Intervention\Image\Facades\Image;
 use ZipArchive;
 
-class ParseBook extends Command implements SelfHandling, ShouldBeQueued
+class PushBook extends Command implements SelfHandling, ShouldBeQueued
 {
 
     use InteractsWithQueue, SerializesModels;
@@ -43,9 +43,12 @@ class ParseBook extends Command implements SelfHandling, ShouldBeQueued
      */
     public function handle()
     {
-
-        $parser = new BookParser($this->file);
-        $meta = $parser->parse();
+        try {
+            $meta =  BookParser::getInstance()->parse($this->file);
+        } catch (\Exception $e) {
+            //todo traiter les erreur par type
+            //créer les exceptions
+        }
         if ($meta) {
             $slug = $this->createBook($meta);
             if (!empty($slug)) {

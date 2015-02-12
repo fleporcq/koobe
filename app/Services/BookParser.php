@@ -18,14 +18,23 @@ class BookParser {
 
     const OPF_XMLNS = 'http://www.idpf.org/2007/opf';
 
+    private static $_instance = null;
+
     protected $file;
 
-    public function __construct($file)
+    private function __construct()
     {
-        $this->file = $file;
     }
 
-    public function parse(){
+    public static function getInstance() {
+        if(is_null(self::$_instance)) {
+            self::$_instance = new BookParser();
+        }
+        return self::$_instance;
+    }
+
+    public function parse($file){
+        $this->file = $file;
         $meta = null;
         if (file_exists($this->file)) {
             //todo vérifier ext + mime type sinon throw
