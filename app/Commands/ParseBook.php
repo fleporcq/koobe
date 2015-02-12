@@ -4,6 +4,7 @@ use App\Models\Author;
 use App\Models\Book;
 use App\Models\Language;
 use App\Models\Theme;
+use App\Services\BookParser;
 use Illuminate\Contracts\Bus\SelfHandling;
 use Illuminate\Contracts\Queue\ShouldBeQueued;
 use Illuminate\Queue\InteractsWithQueue;
@@ -42,69 +43,32 @@ class ParseBook extends Command implements SelfHandling, ShouldBeQueued
      */
     public function handle()
     {
-        if (File::exists($this->file) && File::extension($this->file) === self::EXTENSION) {
-            $epub = new ZipArchive();
-            $epub->open($this->file);
-            $opf = $this->extractOpf($this->file, $epub);
 
-            if ($opf) {
-                $slug = $this->createBook($opf);
-                if (!empty($slug)) {
-                    $this->createCover($opf, $epub, $slug);
-                    $path = dirname($this->file);
-                    File::move($this->file, ($path == "." ? "" : $path . DIRECTORY_SEPARATOR) . $slug . "." . self::EXTENSION);
-                }
-            } else {
-                //Todo File::delete($file);
+        $parser = new BookParser($this->file);
+        $meta = $parser->parse();
+        if ($meta) {
+            $slug = $this->createBook($meta);
+            if (!empty($slug)) {
+                $epub = new ZipArchive();
+                $epub->open($this->file);
+                $this->createCover($meta, $epub, $slug);
+                $path = dirname($this->file);
+                File::move($this->file, ($path == "." ? "" : $path . DIRECTORY_SEPARATOR) . $slug . "." . self::EXTENSION);
             }
-            $this->delete();
-        } else {
-            Log::error($this->file . ' not found. ');
         }
+
+        $this->delete();
+
+
     }
 
-    protected function extractOpf($file, $epub)
+    protected function createBook($meta)
     {
-        $opf = null;
-        try {
-            $containerFile = $epub->getFromName(self::CONTAINER_FILE_PATH);
-        } catch (Exception $e) {
-            Log::error($file . " - " . self::CONTAINER_FILE_PATH . ' not found. ' . $e);
-            return null;
-        }
-
-        $container = simplexml_load_string($containerFile);
-        $rootFilePath = $container->rootfiles->rootfile['full-path'];
-
-        try {
-            $rootFile = $epub->getFromName($rootFilePath);
-        } catch (Exception $e) {
-            Log::error($file . " - " . self::CONTAINER_FILE_PATH . ' not found. ' . $e);
-            return null;
-        }
-
-        $md5 = md5($rootFile);
-
-        if (Book::whereMd5($md5)->count() == 0) {
-            $opf = (object)array(
-                'package' => simplexml_load_string($rootFile),
-                'md5' => $md5,
-                'path' => dirname($rootFilePath)
-            );
-        } else {
-            //Todo log + notification 'Book already in DB'
-        }
-
-        return $opf;
-    }
-
-    protected function createBook($opf)
-    {
-        $dc = $opf->package->metadata->children('dc', true);
+        $dc = $meta->package->metadata->children('dc', true);
 
         $book = new Book();
         $book->enabled = true;
-        $book->md5 = $opf->md5;
+        $book->md5 = $meta->md5;
         $book->title = $this->sanitize($dc->title, true);
         $book->description = $this->sanitize($dc->description);
         $year = substr($dc->date, 0, 4);
@@ -140,43 +104,14 @@ class ParseBook extends Command implements SelfHandling, ShouldBeQueued
         return $book->slug;
     }
 
-    protected function createCover($opf, $epub, $slug)
+    protected function createCover($meta, $epub, $slug)
     {
-        $coverMetadata = $this->getCoverMetadata($opf->package);
-        if ($coverMetadata != null) {
+        if ($meta->cover != null) {
             //Todo tester existence fichier + créer différentes tailles d'images
-            $coverSource = $epub->getFromName(($opf->path == "." ? "" : $opf->path . DIRECTORY_SEPARATOR) . $coverMetadata->href);
+            $coverSource = $epub->getFromName(($meta->path == "." ? "" : $meta->path . DIRECTORY_SEPARATOR) . $meta->cover->href);
             $cover = Image::make($coverSource)->encode('jpg', 75);
             $cover->save(storage_path(Book::COVERS_DIRECTORY) . DIRECTORY_SEPARATOR . $slug . '.jpg');
         }
-    }
-
-    protected function getCoverMetadata($package)
-    {
-        $coverMetadata = null;
-        $package->registerXPathNamespace('opf', self::OPF_XMLNS);
-        $metas = $package->xpath('//opf:metadata//opf:meta[@name="cover"]');
-
-        $items = null;
-
-        if (!empty($metas)) {
-            $coverId = $metas[0]->attributes()["content"];
-            $items = $package->xpath('//opf:manifest//opf:item[@id="' . $coverId . '"]');
-        }
-
-        //fallback
-        if (empty($items)) {
-            $items = $package->xpath("//opf:manifest//opf:item[contains(@href,'cover') and contains(@media-type,'image')]");
-        }
-
-        if (!empty($items)) {
-            $item = $items[0];
-            $coverMetadata = (object)array(
-                'href' => $item->attributes()["href"],
-                'type' => $item->attributes()["media-type"]
-            );
-        }
-        return $coverMetadata;
     }
 
     protected function sanitize($string, $capitalize = false)
