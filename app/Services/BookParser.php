@@ -1,5 +1,8 @@
 <?php namespace App\Services;
 
+use App\Exceptions\ContainerFileNotFoundException;
+use App\Exceptions\EpubFileNotFoundException;
+use App\Exceptions\RootFileNotFoundException;
 use StdClass;
 use ZipArchive;
 
@@ -26,7 +29,7 @@ class BookParser
             $epub->open($this->file);
             $bookMeta = $this->getBookMeta($epub);
         } else {
-            //todo throw file not found
+            throw new EpubFileNotFoundException();
         }
         return $bookMeta;
     }
@@ -69,7 +72,7 @@ class BookParser
         try {
             $containerFile = $epub->getFromName(self::CONTAINER_FILE_PATH);
         } catch (Exception $e) {
-            //todo throw container file not found
+            throw new ContainerFileNotFoundException();
             return null;
         }
 
@@ -79,7 +82,7 @@ class BookParser
         try {
             $rootFile = $epub->getFromName($rootFilePath);
         } catch (Exception $e) {
-            //todo throw root file not found
+            throw new RootFileNotFoundException();
             return null;
         }
 

@@ -1,5 +1,7 @@
 <?php namespace App\Commands;
 
+use App\Exceptions\BookAlreadyStoredException;
+use App\Models\Book;
 use App\Services\BookCreator;
 use App\Services\BookParser;
 use App\Services\CoverCreator;
@@ -44,13 +46,17 @@ class PushBook extends Command implements SelfHandling, ShouldBeQueued
         }
 
         if ($meta) {
-            $bookCreator = new BookCreator($meta);
-            $slug = $bookCreator->create();
-            if (!empty($slug)) {
-                $coverCreator = new CoverCreator($meta->cover, $slug);
-                $coverCreator->create();
-                $path = dirname($this->file);
-                File::move($this->file, ($path == "." ? "" : $path . DIRECTORY_SEPARATOR) . $slug . "." . self::EXTENSION);
+            if (Book::whereMd5($meta->md5)->count() == 0) {
+                $bookCreator = new BookCreator($meta);
+                $slug = $bookCreator->create();
+                if (!empty($slug)) {
+                    $coverCreator = new CoverCreator($meta->cover, $slug);
+                    $coverCreator->create();
+                    $path = dirname($this->file);
+                    File::move($this->file, ($path == "." ? "" : $path . DIRECTORY_SEPARATOR) . $slug . "." . self::EXTENSION);
+                }
+            }else{
+                throw new BookAlreadyStoredException();
             }
         }
 
