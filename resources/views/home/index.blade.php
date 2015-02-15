@@ -132,7 +132,7 @@
             }
 
             $scope.loadMoreBooks = function () {
-                if ($scope.lastPage == null || $scope.page < $scope.lastPage && !$scope.loadingMore) {
+                if (!$scope.loadingMore && ($scope.lastPage == null || $scope.page < $scope.lastPage)) {
                     $scope.loadingMore = true;
                     $timeout(function(){
                         $http.post("{{ URL::action('BookController@get') }}",{
