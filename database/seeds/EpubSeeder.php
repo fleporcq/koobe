@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Database\Seeder;
-use App\Models\Book;
 use App\Commands\PushBook;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades;
 
 class EpubSeeder extends Seeder
 {
@@ -10,8 +10,8 @@ class EpubSeeder extends Seeder
     public function run()
     {
         self::clean();
-        $seeds = base_path("database" . DIRECTORY_SEPARATOR . "seeds" . DIRECTORY_SEPARATOR . Book::SEEDS_DIRECTORY);
-        $epubs = storage_path(Book::EPUBS_DIRECTORY);
+        $seeds = Config::get('koobe.paths.epubsSeeds');
+        $epubs = Config::get('koobe.paths.epubs');
         File::copyDirectory($seeds, $epubs);
         foreach (File::files($epubs) as $epub) {
             Queue::push(new PushBook($epub));
@@ -28,10 +28,10 @@ class EpubSeeder extends Seeder
         DB::table('themes')->delete();
         DB::table('books')->delete();
         DB::table('languages')->delete();
-        $epubs = storage_path(Book::EPUBS_DIRECTORY);
+        $epubs = Config::get('koobe.paths.epubs');
         foreach (File::files($epubs) as $epub) {
             File::delete($epub);
         }
-        File::cleanDirectory(storage_path(Book::COVERS_DIRECTORY));
+        File::cleanDirectory(Config::get('koobe.paths.covers'));
     }
 }

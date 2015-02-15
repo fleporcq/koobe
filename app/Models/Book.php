@@ -45,11 +45,6 @@ class Book extends Model
 {
     use \KDuma\Eloquent\Slugabble;
 
-    const NO_COVER_FILE = "no-cover";
-    const COVERS_DIRECTORY = "covers";
-    const EPUBS_DIRECTORY = "epubs";
-    const SEEDS_DIRECTORY = "epubs";
-
     public function authors()
     {
         return $this->belongsToMany('App\Models\Author');

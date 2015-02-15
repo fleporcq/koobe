@@ -1,14 +1,28 @@
-<?php
-/**
- * Created by IntelliJ IDEA.
- * User: fleporcq
- * Date: 12/02/15
- * Time: 16:52
- */
+<?php namespace App\Services;
 
-namespace app\Services;
+use Illuminate\Support\Facades\Config;
+use Intervention\Image\Facades\Image;
 
+class CoverCreator
+{
 
-class CoverCreator {
+    private $source = null;
 
+    private $name = null;
+
+    public function __construct($source, $name)
+    {
+        $this->source = $source;
+        $this->name = $name;
+    }
+
+    public function create()
+    {
+        if ($this->source != null) {
+            // créer différentes tailles d'images
+            $coversPath = Config::get('koobe.paths.covers');
+            $cover = Image::make($this->source)->encode('jpg', 75);
+            $cover->save($coversPath . DIRECTORY_SEPARATOR . $this->name . '.jpg');
+        }
+    }
 }

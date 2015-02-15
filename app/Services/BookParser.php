@@ -1,53 +1,69 @@
-<?php
-/**
- * Created by IntelliJ IDEA.
- * User: fleporcq
- * Date: 12/02/15
- * Time: 14:11
- */
+<?php namespace App\Services;
 
-namespace App\Services;
-
+use StdClass;
 use ZipArchive;
 
-class BookParser {
-
-
+class BookParser
+{
 
     const CONTAINER_FILE_PATH = 'META-INF/container.xml';
 
     const OPF_XMLNS = 'http://www.idpf.org/2007/opf';
 
-    private static $_instance = null;
-
     protected $file;
 
-    private function __construct()
+    public function __construct($file)
     {
-    }
-
-    public static function getInstance() {
-        if(is_null(self::$_instance)) {
-            self::$_instance = new BookParser();
-        }
-        return self::$_instance;
-    }
-
-    public function parse($file){
         $this->file = $file;
-        $meta = null;
+    }
+
+    public function parse()
+    {
+        $bookMeta = null;
         if (file_exists($this->file)) {
             //todo vérifier ext + mime type sinon throw
             $epub = new ZipArchive();
             $epub->open($this->file);
-            $meta =  $this->extractRootFile($epub);
+            $bookMeta = $this->getBookMeta($epub);
         } else {
-           //todo throw file not found
+            //todo throw file not found
         }
-        return $meta;
+        return $bookMeta;
     }
 
-    protected function extractRootFile($epub)
+    protected function getBookMeta($epub)
+    {
+        $rootFileMeta = $this->extractRootFileMeta($epub);
+        $dc = $rootFileMeta->package->metadata->children('dc', true);
+
+        $bookMeta = new stdClass();
+
+        $bookMeta->md5 = $rootFileMeta->md5;
+        $bookMeta->title = $dc->title;
+        $bookMeta->description = $dc->description;
+        $bookMeta->date = $dc->date;
+        $bookMeta->language = $dc->language;
+
+        $bookMeta->authors = [];
+        foreach ($dc->creator as $author) {
+            $bookMeta->authors[] = $author;
+        }
+
+        $bookMeta->themes = [];
+        if (!empty($dc->type)) {
+            $bookMeta->themes[] = $dc->type;
+        }
+
+        foreach ($dc->subject as $subject) {
+            $bookMeta->themes[] = $subject;
+        }
+
+        $bookMeta->cover = $epub->getFromName(($rootFileMeta->path == "." ? "" : $rootFileMeta->path . DIRECTORY_SEPARATOR) . $rootFileMeta->cover->href);
+
+        return $bookMeta;
+    }
+
+    protected function extractRootFileMeta($epub)
     {
 
         try {
@@ -84,12 +100,13 @@ class BookParser {
     {
         $coverMetadata = null;
         $package->registerXPathNamespace('opf', self::OPF_XMLNS);
-        $metas = $package->xpath('//opf:metadata//opf:meta[@name="cover"]');
+
+        $coverMeta = $package->xpath('//opf:metadata//opf:meta[@name="cover"]');
 
         $items = null;
 
-        if (!empty($metas)) {
-            $coverId = $metas[0]->attributes()["content"];
+        if (!empty($coverMeta)) {
+            $coverId = $coverMeta[0]->attributes()["content"];
             $items = $package->xpath('//opf:manifest//opf:item[@id="' . $coverId . '"]');
         }
 

@@ -7,6 +7,7 @@ use File;
 use Flow;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 use Intervention\Image\Facades\Image;
 use Queue;
 use Response;
@@ -18,8 +19,11 @@ class BookController extends KoobeController
     {
         self::notFoundIfNull($slug);
 
-        $coverFilePath = storage_path(Book::COVERS_DIRECTORY . DIRECTORY_SEPARATOR . $slug . ".jpg");
-        $noCoverFileName = storage_path(Book::COVERS_DIRECTORY . DIRECTORY_SEPARATOR . Book::NO_COVER_FILE . ".jpg");
+        $coversPath = Config::get('koobe.paths.covers');
+
+        $coverFilePath = $coversPath . DIRECTORY_SEPARATOR . $slug . ".jpg";
+
+        $noCoverFileName = $coversPath . DIRECTORY_SEPARATOR . Config::get('koobe.covers.noCover');
 
         if (File::exists($coverFilePath)) {
             $cover = Image::make($coverFilePath);
@@ -35,8 +39,8 @@ class BookController extends KoobeController
     public function download($slug)
     {
         self::notFoundIfNull($slug);
-
-        $epubFilePath = storage_path(Book::EPUBS_DIRECTORY . DIRECTORY_SEPARATOR . $slug . ".epub");
+        $epubsPath = Config::get('koobe.paths.epubs');
+        $epubFilePath = $epubsPath . DIRECTORY_SEPARATOR . $slug . ".epub";
 
         $book = Book::bySlug($slug);
 
@@ -62,7 +66,7 @@ class BookController extends KoobeController
             $books = $books->search($terms);
         }
         if (!empty($themeId)) {
-            if(empty($terms)){
+            if (empty($terms)) {
                 $books = $books->leftJoin('book_theme', 'book_theme.book_id', '=', 'books.id');
             }
             $books->where("book_theme.theme_id", "=", $themeId);
