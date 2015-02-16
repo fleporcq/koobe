@@ -1,10 +1,8 @@
 <?php namespace App\Services;
 
-use App\Exceptions\ContainerFileNotFoundException;
-use App\Exceptions\EpubFileNotFoundException;
-use App\Exceptions\RootFileNotFoundException;
 use StdClass;
 use ZipArchive;
+
 
 class BookParser
 {
@@ -24,10 +22,13 @@ class BookParser
     {
         $bookMeta = null;
         if (file_exists($this->file)) {
-            //todo vérifier ext + mime type sinon throw
-            $epub = new ZipArchive();
-            $epub->open($this->file);
-            $bookMeta = $this->getBookMeta($epub);
+            if(finfo_file(finfo_open(FILEINFO_MIME_TYPE),$this->file) == "application/epub+zip") {
+                $epub = new ZipArchive();
+                $epub->open($this->file);
+                $bookMeta = $this->getBookMeta($epub);
+            } else {
+                throw new NotValidEpubException();
+            }
         } else {
             throw new EpubFileNotFoundException();
         }
@@ -127,4 +128,24 @@ class BookParser
         }
         return $coverMetadata;
     }
+}
+
+class ContainerFileNotFoundException extends \Exception
+{
+
+}
+
+class EpubFileNotFoundException extends \Exception
+{
+
+}
+
+class NotValidEpubException extends \Exception
+{
+
+}
+
+class RootFileNotFoundException extends \Exception
+{
+
 }

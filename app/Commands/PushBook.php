@@ -1,10 +1,13 @@
 <?php namespace App\Commands;
 
-use App\Exceptions\BookAlreadyStoredException;
 use App\Models\Book;
 use App\Services\BookCreator;
 use App\Services\BookParser;
+use App\Services\ContainerFileNotFoundException;
 use App\Services\CoverCreator;
+use App\Services\EpubFileNotFoundException;
+use App\Services\NotValidEpubException;
+use App\Services\RootFileNotFoundException;
 use Illuminate\Contracts\Bus\SelfHandling;
 use Illuminate\Contracts\Queue\ShouldBeQueued;
 use Illuminate\Queue\InteractsWithQueue;
@@ -37,12 +40,19 @@ class PushBook extends Command implements SelfHandling, ShouldBeQueued
      */
     public function handle()
     {
+        $meta = null;
+
         try {
             $parser = new BookParser($this->file);
             $meta = $parser->parse();
-        } catch (\Exception $e) {
-            //todo traiter les erreur par type
-            //créer les exceptions
+        } catch (EpubFileNotFoundException $e) {
+            //todo notify
+        } catch (NotValidEpubException $e) {
+            //todo notify
+        } catch (ContainerFileNotFoundException $e) {
+            //todo notify
+        } catch (RootFileNotFoundException $e) {
+            //todo notify
         }
 
         if ($meta) {
@@ -55,8 +65,8 @@ class PushBook extends Command implements SelfHandling, ShouldBeQueued
                     $path = dirname($this->file);
                     File::move($this->file, ($path == "." ? "" : $path . DIRECTORY_SEPARATOR) . $slug . "." . self::EXTENSION);
                 }
-            }else{
-                throw new BookAlreadyStoredException();
+            } else {
+                //todo notifier book deja dans la base
             }
         }
 
