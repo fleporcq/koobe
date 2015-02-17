@@ -14,8 +14,8 @@ class EpubSeeder extends Seeder
         $epubs = Config::get('koobe.paths.epubs');
         File::copyDirectory($seeds, $epubs);
         foreach (File::files($epubs) as $epub) {
+            //todo ajouter user ?
             Queue::push(new PushBook($epub));
-
         }
     }
 

@@ -6,6 +6,7 @@ use App\Services\BookParser;
 use App\Services\ContainerFileNotFoundException;
 use App\Services\CoverCreator;
 use App\Services\EpubFileNotFoundException;
+use App\Services\Notifier;
 use App\Services\NotValidEpubException;
 use App\Services\RootFileNotFoundException;
 use Illuminate\Contracts\Bus\SelfHandling;
@@ -13,6 +14,7 @@ use Illuminate\Contracts\Queue\ShouldBeQueued;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\File;
+use InvalidArgumentException;
 
 class PushBook extends Command implements SelfHandling, ShouldBeQueued
 {
@@ -28,9 +30,13 @@ class PushBook extends Command implements SelfHandling, ShouldBeQueued
      *
      * @return void
      */
-    public function __construct($file)
+    public function __construct($file, $user = null)
     {
+        if ($file == null || $user == null || $user->id == null) {
+            throw new InvalidArgumentException();
+        }
         $this->file = $file;
+        $this->user = $user;
     }
 
     /**
@@ -46,13 +52,13 @@ class PushBook extends Command implements SelfHandling, ShouldBeQueued
             $parser = new BookParser($this->file);
             $meta = $parser->parse();
         } catch (EpubFileNotFoundException $e) {
-            //todo notify
+            Notifier::error($this->user->id, "EpubFileNotFoundException");
         } catch (NotValidEpubException $e) {
-            //todo notify
+            Notifier::error($this->user->id, "NotValidEpubException");
         } catch (ContainerFileNotFoundException $e) {
-            //todo notify
+            Notifier::error($this->user->id, "ContainerFileNotFoundException");
         } catch (RootFileNotFoundException $e) {
-            //todo notify
+            Notifier::error($this->user->id, "RootFileNotFoundException");
         }
 
         if ($meta) {
@@ -66,7 +72,7 @@ class PushBook extends Command implements SelfHandling, ShouldBeQueued
                     File::move($this->file, ($path == "." ? "" : $path . DIRECTORY_SEPARATOR) . $slug . "." . self::EXTENSION);
                 }
             } else {
-                //todo notifier book deja dans la base
+                Notifier::error($this->user->id, "BookAlreadyStored");
             }
         }
 

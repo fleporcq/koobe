@@ -23,9 +23,9 @@ class Author extends Model
 
     use \KDuma\Eloquent\Slugabble;
 
-    protected $hidden = array('pivot');
+    protected $hidden = ['pivot'];
 
-    protected $fillable = array('name');
+    protected $fillable = ['name'];
 
     protected function SluggableString(){
         return $this->name;

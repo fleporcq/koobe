@@ -47,8 +47,10 @@ class BookController extends KoobeController
         self::notFoundIfNull($book);
 
         if (File::exists($epubFilePath)) {
-            $download = new Download($book->id, $this->connectedUser->id);
-            $download->save();
+            Download::create([
+                "book_id" => $book->id,
+                "user_id" => $this->connectedUser->id
+            ]);
             $response = response()->download($epubFilePath);
         } else {
             abort(404);
@@ -103,7 +105,7 @@ class BookController extends KoobeController
             }
         }
         if ($file->validateFile() && $file->save($destination)) {
-            Queue::push(new PushBook($destination));
+            Queue::push(new PushBook($destination, $this->connectedUser));
             $response = Response::make('pass some success message to flow.js', 200);
         }
         return $response;

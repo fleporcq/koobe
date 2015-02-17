@@ -18,10 +18,11 @@ class Download extends Model
 
     public $timestamps = false;
 
-    public function __construct($book_id, $user_id)
+    protected $fillable = ['book_id', 'user_id'];
+
+    public function __construct(array $attributes = array())
     {
-        $this->book_id = $book_id;
-        $this->user_id = $user_id;
+        parent::__construct($attributes);
         $this->downloaded_at = new Carbon();
     }
 
