@@ -7,7 +7,7 @@ use InvalidArgumentException;
 abstract class Notifier
 {
 
-    public static function push($user, $message = null, NotificationType $type = null)
+    public static function push($user, $message = null, $type = null)
     {
         if ($user != null && $user->id != null && !empty($message) && $type != null) {
             Notification::create([

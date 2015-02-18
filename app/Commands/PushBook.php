@@ -15,6 +15,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\File;
 use InvalidArgumentException;
+use Exception;
 
 class PushBook extends Command implements SelfHandling, ShouldBeQueued
 {
@@ -24,6 +25,7 @@ class PushBook extends Command implements SelfHandling, ShouldBeQueued
     const EXTENSION = "epub";
 
     protected $file;
+    protected $user;
 
     /**
      * Create a new command instance.
@@ -32,7 +34,7 @@ class PushBook extends Command implements SelfHandling, ShouldBeQueued
      */
     public function __construct($file, $user = null)
     {
-        if ($file == null || $user == null || $user->id == null) {
+        if ($file == null) {
             throw new InvalidArgumentException();
         }
         $this->file = $file;
@@ -49,16 +51,29 @@ class PushBook extends Command implements SelfHandling, ShouldBeQueued
         $meta = null;
 
         try {
-            $parser = new BookParser($this->file);
-            $meta = $parser->parse();
+            try {
+                $parser = new BookParser($this->file);
+                $meta = $parser->parse();
+            } catch (\Exception $e) {
+                File::delete($this->file);
+                throw $e;
+            }
         } catch (EpubFileNotFoundException $e) {
-            Notifier::error($this->user->id, "EpubFileNotFoundException");
+            if ($this->user != null) {
+                Notifier::error($this->user, "EpubFileNotFoundException");
+            }
         } catch (NotValidEpubException $e) {
-            Notifier::error($this->user->id, "NotValidEpubException");
+            if ($this->user != null) {
+                Notifier::error($this->user, "NotValidEpubException");
+            }
         } catch (ContainerFileNotFoundException $e) {
-            Notifier::error($this->user->id, "ContainerFileNotFoundException");
+            if ($this->user != null) {
+                Notifier::error($this->user, "ContainerFileNotFoundException");
+            }
         } catch (RootFileNotFoundException $e) {
-            Notifier::error($this->user->id, "RootFileNotFoundException");
+            if ($this->user != null) {
+                Notifier::error($this->user, "RootFileNotFoundException");
+            }
         }
 
         if ($meta) {
