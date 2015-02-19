@@ -85,11 +85,15 @@ class BookController extends KoobeController
     public function flow(Request $request)
     {
         $flowRequest = new Flow\Request();
-        $destination = storage_path('/epubs/' . uniqid() . '.epub');
+
+        $chunksPath = Config::get('koobe.paths.chunks');
+
         $config = new Flow\Config([
-            'tempDir' => storage_path('/epubs/chunks')
+            'tempDir' => $chunksPath
         ]);
+
         $file = new Flow\File($config, $flowRequest);
+
         $response = Response::make('', 200);
 
         if ($request->isMethod('get')) {
@@ -104,10 +108,15 @@ class BookController extends KoobeController
                 return Response::make('', 400);
             }
         }
+
+        $epubsPath = Config::get('koobe.paths.epubs');
+        $destination = $epubsPath . DIRECTORY_SEPARATOR . $file->getIdentifier() . '.epub';
+
         if ($file->validateFile() && $file->save($destination)) {
             Queue::push(new PushBook($destination, $this->connectedUser));
             $response = Response::make('pass some success message to flow.js', 200);
         }
+
         return $response;
     }
 }

@@ -7,6 +7,7 @@ return [
     'paths' => [
         'covers' => storage_path('covers'),
         'epubs' => storage_path('epubs'),
+        'chunks' => storage_path('epubs/chunks'),
         'epubsSeeds' => base_path('database' . DIRECTORY_SEPARATOR . 'seeds' . DIRECTORY_SEPARATOR . 'epubs')
     ]
 ];
