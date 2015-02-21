@@ -20,4 +20,5 @@ Route::get('/epubs/{slug}.epub', 'BookController@download');
 Route::get('/auth/login', 'Auth\AuthController@login');
 Route::post('/auth/login', 'Auth\AuthController@authenticate');
 Route::get('/auth/logout', 'Auth\AuthController@logout');
+Route::get('/notifications', 'NotificationController@all');
 

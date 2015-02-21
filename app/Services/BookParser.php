@@ -27,7 +27,7 @@ class BookParser
                 $epub->open($this->file);
                 $bookMeta = $this->getBookMeta($epub);
             } else {
-                throw new NotValidEpubException();
+                throw new NotAValidEpubException();
             }
         } else {
             throw new EpubFileNotFoundException();
@@ -140,7 +140,7 @@ class EpubFileNotFoundException extends \Exception
 
 }
 
-class NotValidEpubException extends \Exception
+class NotAValidEpubException extends \Exception
 {
 
 }

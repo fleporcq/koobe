@@ -10,6 +10,7 @@ return [
         'home' => 'Bibliothèque',
         'upload' => 'Ajouter des livres',
         'logout' => 'Déconnexion',
+        'notifications' => 'Notifications',
     ],
     'home' => [
         'search' => 'Titre, description, auteur',

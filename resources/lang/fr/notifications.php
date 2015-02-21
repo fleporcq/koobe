@@ -1,8 +1,8 @@
 <?php
 return [
-    'epubFileNotFound' => 'Le fichier ":file" n\'a pas été trouvé. ',
-    'notValidEpub' => 'Le fichier ":file" n\'est pas un epub valide. ',
-    'containerFileNotFound' => 'Le container du fichier ":file" n\'a pas été trouvé. ',
-    'rootFileNotFound' => 'Le root du fichier ":file" n\'a pas été trouvé. ',
-    'bookAlreadyStored' => 'Le livre ":file" a déjà été ajouté à la bibliothèque. ',
+    'epubFileNotFound' => 'Le fichier ":filename" n\'a pas été trouvé. ',
+    'notAValidEpub' => 'Le fichier ":filename" n\'est pas un epub valide. ',
+    'containerFileNotFound' => 'Le fichier container de l\'epub ":filename" n\'a pas été trouvé. ',
+    'rootFileNotFound' => 'Le fichier root de l\'epub ":filename" n\'a pas été trouvé. ',
+    'bookAlreadyStored' => 'L\'epub ":filename" est déjà dans la bibliothèque. ',
 ];

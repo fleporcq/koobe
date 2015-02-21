@@ -91,7 +91,6 @@ class BookController extends KoobeController
         $config = new Flow\Config([
             'tempDir' => $chunksPath
         ]);
-
         $file = new Flow\File($config, $flowRequest);
 
         $response = Response::make('', 200);
@@ -111,9 +110,10 @@ class BookController extends KoobeController
 
         $epubsPath = Config::get('koobe.paths.epubs');
         $destination = $epubsPath . DIRECTORY_SEPARATOR . $file->getIdentifier() . '.epub';
-
+        $originalFileName = $flowRequest->getFileName();
+        error_log($originalFileName);
         if ($file->validateFile() && $file->save($destination)) {
-            Queue::push(new PushBook($destination, $this->connectedUser));
+            Queue::push(new PushBook($destination, $this->connectedUser, $originalFileName));
             $response = Response::make('pass some success message to flow.js', 200);
         }
 

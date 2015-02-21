@@ -1,8 +1,8 @@
-@extends('layouts.master',array(
-	"htmlTagAttrs" => array(
+@extends('layouts.master',[
+	"htmlTagAttrs" => [
 		"ng-app" => "koobeApp"
-	)
-))
+	]
+])
 @section('content')
     <div flow-init flow-files-submitted="$flow.upload()">
         <div class="well" flow-drop ng-class="dropClass">

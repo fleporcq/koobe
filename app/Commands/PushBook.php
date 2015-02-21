@@ -27,19 +27,21 @@ class PushBook extends Command implements SelfHandling, ShouldBeQueued
 
     protected $file;
     protected $user;
+    protected $filename;
 
     /**
      * Create a new command instance.
      *
      * @return void
      */
-    public function __construct($file, $user = null)
+    public function __construct($file, $user = null, $filename = null)
     {
         if ($file == null) {
             throw new InvalidArgumentException();
         }
         $this->file = $file;
         $this->user = $user;
+        $this->filename = !empty($filename) ? $filename : basename($this->file);
     }
 
     /**
@@ -57,18 +59,18 @@ class PushBook extends Command implements SelfHandling, ShouldBeQueued
                 $meta = $parser->parse();
             } catch (\Exception $e) {
                 File::delete($this->file);
-                if ($this->user != null && $this->user->id != null) {
+                if ($this->user != null && $this->user->id != null && !empty($this->filename)) {
                     throw $e;
                 }
             }
         } catch (EpubFileNotFoundException $e) {
-            Notifier::error($this->user, Lang::get('notifications.epubFileNotFound', ['file' => $this->file]));
-        } catch (NotValidEpubException $e) {
-            Notifier::error($this->user, Lang::get('notifications.notValidEpub', ['file' => $this->file]));
+            Notifier::error($this->user, Lang::get('notifications.epubFileNotFound', ['filename' => $this->filename]));
+        } catch (NotAValidEpubException $e) {
+            Notifier::error($this->user, Lang::get('notifications.notAValidEpub', ['filename' => $this->filename]));
         } catch (ContainerFileNotFoundException $e) {
-            Notifier::error($this->user, Lang::get('notifications.containerFileNotFound', ['file' => $this->file]));
+            Notifier::error($this->user, Lang::get('notifications.containerFileNotFound', ['filename' => $this->filename]));
         } catch (RootFileNotFoundException $e) {
-            Notifier::error($this->user, Lang::get('notifications.rootFileNotFound', ['file' => $this->file]));
+            Notifier::error($this->user, Lang::get('notifications.rootFileNotFound', ['filename' => $this->filename]));
         }
 
         if ($meta) {
@@ -82,7 +84,7 @@ class PushBook extends Command implements SelfHandling, ShouldBeQueued
                     File::move($this->file, ($path == "." ? "" : $path . DIRECTORY_SEPARATOR) . $slug . "." . self::EXTENSION);
                 }
             } else {
-                Notifier::error($this->user, Lang::get('notifications.bookAlreadyStored', ['file' => $this->file]));
+                Notifier::error($this->user, Lang::get('notifications.bookAlreadyStored', ['filename' => $this->filename]));
                 File::delete($this->file);
             }
         }

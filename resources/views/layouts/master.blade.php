@@ -24,6 +24,7 @@
                     <ul class="nav navbar-nav">
                         <li{!! $currentAction == "HomeController@index" ? ' class="active"' : '' !!}><a href="{{ URL::action('HomeController@index') }}">@lang('messages.navbar.home')</a></li>
                         <li{!! $currentAction == "BookController@upload" ? ' class="active"' : '' !!}><a href="{{ URL::action('BookController@upload') }}">@lang('messages.navbar.upload')</a></li>
+                        <li{!! $currentAction == "NotificationController@all" ? ' class="active"' : '' !!}><a href="{{ URL::action('NotificationController@all') }}">@lang('messages.navbar.notifications')</a></li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li><a href="{{ URL::action('Auth\AuthController@logout') }}"><span class="glyphicon glyphicon-off"></span>&nbsp;@lang('messages.navbar.logout')</a></li>
