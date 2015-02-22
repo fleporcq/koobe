@@ -7,7 +7,7 @@ use App\Services\ContainerFileNotFoundException;
 use App\Services\CoverCreator;
 use App\Services\EpubFileNotFoundException;
 use App\Services\Notifier;
-use App\Services\NotValidEpubException;
+use App\Services\NotAValidEpubException;
 use App\Services\RootFileNotFoundException;
 use Exception;
 use Illuminate\Contracts\Bus\SelfHandling;
@@ -73,11 +73,11 @@ class PushBook extends Command implements SelfHandling, ShouldBeQueued
             Notifier::error($this->user, Lang::get('notifications.rootFileNotFound', ['filename' => $this->filename]));
         }
 
-        if ($meta) {
+        if ($meta != null && $meta->md5 !=null ) {
             if (Book::whereMd5($meta->md5)->count() == 0) {
                 $bookCreator = new BookCreator($meta);
                 $slug = $bookCreator->create();
-                if (!empty($slug)) {
+                if (!empty($slug) && $meta->cover != null) {
                     $coverCreator = new CoverCreator($meta->cover, $slug);
                     $coverCreator->create();
                     $path = dirname($this->file);

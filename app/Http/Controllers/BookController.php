@@ -111,7 +111,7 @@ class BookController extends KoobeController
         $epubsPath = Config::get('koobe.paths.epubs');
         $destination = $epubsPath . DIRECTORY_SEPARATOR . $file->getIdentifier() . '.epub';
         $originalFileName = $flowRequest->getFileName();
-        error_log($originalFileName);
+
         if ($file->validateFile() && $file->save($destination)) {
             Queue::push(new PushBook($destination, $this->connectedUser, $originalFileName));
             $response = Response::make('pass some success message to flow.js', 200);
