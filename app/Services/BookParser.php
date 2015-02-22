@@ -21,7 +21,8 @@ class BookParser
     {
         $bookMeta = null;
         if (file_exists($this->file)) {
-            if (finfo_file(finfo_open(FILEINFO_MIME_TYPE), $this->file) == "application/epub+zip") {
+            $mimeType = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $this->file);
+            if ($mimeType == "application/epub+zip" || $mimeType == "application/zip") {
                 $epub = new ZipArchive();
                 $epub->open($this->file);
                 $bookMeta = $this->getBookMeta($epub);
