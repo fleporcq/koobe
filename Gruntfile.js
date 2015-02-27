@@ -23,6 +23,7 @@ module.exports = function(grunt) {
             angular: {
                 src: [
                     './bower_components/angular/angular.min.js',
+                    './bower_components/angular-route/angular-route.min.js',
                     './bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js'
                 ],
                 dest: './public/assets/javascript/angular.js'
@@ -40,6 +41,18 @@ module.exports = function(grunt) {
                     './bower_components/ng-flow/dist/ng-flow-standalone.min.js'
                 ],
                 dest: './public/assets/javascript/ng-flow.js'
+            },
+            app:{
+                src: [
+                    './resources/assets/javascript/app.js'
+                ],
+                dest: './public/assets/javascript/app.js'
+            },
+            controllers:{
+                src: [
+                    './resources/assets/javascript/controllers.js'
+                ],
+                dest: './public/assets/javascript/controllers.js'
             },
             main: {
                 src: [

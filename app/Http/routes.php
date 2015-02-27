@@ -23,4 +23,5 @@ Route::get('/auth/logout', 'Auth\AuthController@logout');
 Route::get('/notifications', 'NotificationController@index');
 Route::get('/notifications/all', 'NotificationController@all');
 Route::get('/notification/delete', 'NotificationController@delete');
+Route::get('/spa', 'SpaController@index');
 
