@@ -1,8 +1,8 @@
-@extends('layouts.master',array(
-	"htmlTagAttrs" => array(
+@extends('layouts.master',[
+	"htmlTagAttrs" => [
 		"ng-app" => "koobeApp"
-	)
-))
+	]
+])
 @section('content')
     <div flow-init flow-files-submitted="$flow.upload()">
         <div class="well" flow-drop ng-class="dropClass">
@@ -66,7 +66,7 @@
                     }
                 };
                 flowFactoryProvider.on('catchAll', function (event) {
-                    console.log('catchAll', arguments);
+                    //console.log('catchAll', arguments);
                 });
                 // Can be used with different implementations of Flow.js
                 // flowFactoryProvider.factory = fustyFlowFactory;

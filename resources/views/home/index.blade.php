@@ -1,12 +1,12 @@
-@extends('layouts.master',array(
-	"htmlTagAttrs" => array(
+@extends('layouts.master', [
+	"htmlTagAttrs" => [
 		"ng-app" => "koobeApp",
 		"ng-controller" => "BooksCtrl"
-	),
-	"bodyTagAttrs" => array(
+	],
+	"bodyTagAttrs" => [
 		"when-scrolled" => "loadMoreBooks()"
-	)
-))
+	]
+])
 @section('content')
 
     <form ng-submit="search.search()" id="search" class="input-group">

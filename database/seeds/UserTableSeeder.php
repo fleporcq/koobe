@@ -10,6 +10,7 @@ class UserTableSeeder extends Seeder
     {
         DB::table('rates')->delete();
         DB::table('downloads')->delete();
+        DB::table('notifications')->delete();
         DB::table('users')->delete();
 
         User::create(array(

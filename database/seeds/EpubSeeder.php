@@ -15,7 +15,6 @@ class EpubSeeder extends Seeder
         File::copyDirectory($seeds, $epubs);
         foreach (File::files($epubs) as $epub) {
             Queue::push(new PushBook($epub));
-
         }
     }
 

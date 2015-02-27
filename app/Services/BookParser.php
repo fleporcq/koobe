@@ -1,10 +1,7 @@
 <?php namespace App\Services;
 
-use App\Exceptions\ContainerFileNotFoundException;
-use App\Exceptions\EpubFileNotFoundException;
-use App\Exceptions\RootFileNotFoundException;
-use StdClass;
 use ZipArchive;
+use Exception;
 
 class BookParser
 {
@@ -24,10 +21,14 @@ class BookParser
     {
         $bookMeta = null;
         if (file_exists($this->file)) {
-            //todo vérifier ext + mime type sinon throw
-            $epub = new ZipArchive();
-            $epub->open($this->file);
-            $bookMeta = $this->getBookMeta($epub);
+            $mimeType = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $this->file);
+            if ($mimeType == "application/epub+zip" || $mimeType == "application/zip") {
+                $epub = new ZipArchive();
+                $epub->open($this->file);
+                $bookMeta = $this->getBookMeta($epub);
+            } else {
+                throw new NotAValidEpubException();
+            }
         } else {
             throw new EpubFileNotFoundException();
         }
@@ -36,35 +37,40 @@ class BookParser
 
     protected function getBookMeta($epub)
     {
+        $bookMeta = new BookMeta();
+
         $rootFileMeta = $this->extractRootFileMeta($epub);
-        $dc = $rootFileMeta->package->metadata->children('dc', true);
 
-        $bookMeta = new stdClass();
+        if ($rootFileMeta != null) {
+            $dc = $rootFileMeta->package->metadata->children('dc', true);
+            if ($dc != null && @count($dc)) {
 
-        $bookMeta->md5 = $rootFileMeta->md5;
-        $bookMeta->title = $dc->title;
-        $bookMeta->description = $dc->description;
-        $bookMeta->date = $dc->date;
-        $bookMeta->language = $dc->language;
+                $bookMeta->md5 = $rootFileMeta->md5;
+                $bookMeta->title = $dc->title;
+                $bookMeta->description = $dc->description;
+                $bookMeta->date = $dc->date;
+                $bookMeta->language = $dc->language;
 
-        $bookMeta->authors = [];
-        foreach ($dc->creator as $author) {
-            $bookMeta->authors[] = $author;
+                foreach ($dc->creator as $author) {
+                    $bookMeta->authors[] = $author;
+                }
+
+                if (!empty($dc->type)) {
+                    $bookMeta->themes[] = $dc->type;
+                }
+
+                foreach ($dc->subject as $subject) {
+                    $bookMeta->themes[] = $subject;
+                }
+
+            }
+            if ($rootFileMeta->cover != null) {
+                $bookMeta->cover = $epub->getFromName(($rootFileMeta->path == "." ? "" : $rootFileMeta->path . DIRECTORY_SEPARATOR) . $rootFileMeta->cover->href);
+            }
         }
-
-        $bookMeta->themes = [];
-        if (!empty($dc->type)) {
-            $bookMeta->themes[] = $dc->type;
-        }
-
-        foreach ($dc->subject as $subject) {
-            $bookMeta->themes[] = $subject;
-        }
-
-        $bookMeta->cover = $epub->getFromName(($rootFileMeta->path == "." ? "" : $rootFileMeta->path . DIRECTORY_SEPARATOR) . $rootFileMeta->cover->href);
-
         return $bookMeta;
     }
+
 
     protected function extractRootFileMeta($epub)
     {
@@ -127,4 +133,36 @@ class BookParser
         }
         return $coverMetadata;
     }
+}
+
+class ContainerFileNotFoundException extends \Exception
+{
+
+}
+
+class EpubFileNotFoundException extends \Exception
+{
+
+}
+
+class NotAValidEpubException extends \Exception
+{
+
+}
+
+class RootFileNotFoundException extends \Exception
+{
+
+}
+
+class BookMeta
+{
+    public $md5 = null;
+    public $title = null;
+    public $description = null;
+    public $date = null;
+    public $language = null;
+    public $authors = [];
+    public $themes = [];
+    public $cover = null;
 }
