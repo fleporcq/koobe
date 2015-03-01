@@ -7,11 +7,10 @@
 
 @section('content')
     <ul>
-        <li ng-repeat="notification in notifications" class="alert alert-warning" role="alert">
+        <li ng-repeat="notification in notifications" class="alert" ng-class="{ERROR:'alert-danger', WARNING:'alert-warning', 'INFO':'alert-info'}[notification.type]" role="alert">
             <button type="button" class="close" ng-click="deleteNotification($index, notification.id)"><span aria-hidden="true">&times;</span></button>
             <span>@{{notification.pushed_at}}</span>
             <span>@{{notification.message}}</span>
-            <span>@{{notification.type}}</span>
         </li>
     </ul>
 @stop

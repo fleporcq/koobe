@@ -84,7 +84,7 @@ class PushBook extends Command implements SelfHandling, ShouldBeQueued
                     File::move($this->file, ($path == "." ? "" : $path . DIRECTORY_SEPARATOR) . $slug . "." . self::EXTENSION);
                 }
             } else {
-                Notifier::error($this->user, Lang::get('notifications.bookAlreadyStored', ['filename' => $this->filename]));
+                Notifier::warning($this->user, Lang::get('notifications.bookAlreadyStored', ['filename' => $this->filename]));
                 File::delete($this->file);
             }
         }
