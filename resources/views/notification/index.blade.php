@@ -17,11 +17,9 @@
 
 @section('scripts')
 
-    {!! HTML::script('assets/javascript/angular.js') !!}
-
     <script type="text/javascript">
 
-        var koobeApp = angular.module('koobeApp', []);
+        var koobeApp = angular.module('koobeApp');
 
 
         koobeApp.controller('NotificationsCtrl', function ($scope, $http) {

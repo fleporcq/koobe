@@ -11,8 +11,9 @@ module.exports = function(grunt) {
                 },
                 files: {
                     //compiling main.less into main.css
-                    "./public/assets/stylesheets/main.css":"./resources/assets/stylesheets/main.less",
-                    "./public/assets/stylesheets/login.css":"./resources/assets/stylesheets/login.less"
+                    "./public/assets/stylesheets/main.css": "./resources/assets/stylesheets/main.less",
+                    "./public/assets/stylesheets/login.css": "./resources/assets/stylesheets/login.less",
+                    "./public/assets/stylesheets/angular-notify.css": "./bower_components/angular-notify/dist/angular-notify.min.css"
                 }
             }
         },
@@ -40,6 +41,13 @@ module.exports = function(grunt) {
                     './bower_components/ng-flow/dist/ng-flow-standalone.min.js'
                 ],
                 dest: './public/assets/javascript/ng-flow.js'
+            },
+            ngnotifier:{
+                src: [
+                    './bower_components/angular-notify/dist/angular-notify.min.js',
+                    './resources/assets/javascript/ng-notifier.js'
+                ],
+                dest: './public/assets/javascript/ng-notifier.js'
             },
             main: {
                 src: [

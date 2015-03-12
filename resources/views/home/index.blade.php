@@ -114,12 +114,12 @@
 
 @section('scripts')
 
-    {!! HTML::script('assets/javascript/angular.js') !!}
     {!! HTML::script('assets/javascript/masonry.js') !!}
 
     <script type="text/javascript">
 
-        var koobeApp = angular.module('koobeApp', ['wu.masonry', 'ui.bootstrap']);
+
+        var koobeApp = angular.module('koobeApp', ['wu.masonry', 'ui.bootstrap', 'notifier']);
 
 
         koobeApp.controller('BooksCtrl', function ($scope, $http, $timeout) {

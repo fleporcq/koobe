@@ -20,7 +20,17 @@ class NotificationController extends KoobeController
         $userId = $connectedUser->id;
         $this->notFoundIfNull($userId);
 
-        $notifications = Notification::whereUserId($userId)->get();
+        $notifications = Notification::whereUserId($userId)->orderBy("pushed_at")->get();
+        return Response::json($notifications);
+    }
+
+    public function latest(){
+        $connectedUser = $this->connectedUser;
+        $this->notFoundIfNull($connectedUser);
+        $userId = $connectedUser->id;
+        $this->notFoundIfNull($userId);
+        $notifications = Notification::whereUserId($userId)->whereReadedAt(null)->orderBy("pushed_at")->get();
+        //todo update readed_at
         return Response::json($notifications);
     }
 

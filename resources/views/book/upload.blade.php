@@ -46,12 +46,11 @@
 
 @section('scripts')
 
-{!! HTML::script('assets/javascript/angular.js') !!}
 {!! HTML::script('assets/javascript/ng-flow.js') !!}
 
     <script type="text/javascript">
 
-        var koobeApp = angular.module('koobeApp', ['flow'])
+        var koobeApp = angular.module('koobeApp', ['flow', 'notifier'])
             .config(['flowFactoryProvider', function (flowFactoryProvider) {
                 flowFactoryProvider.defaults = {
                     target: '{{ URL::action('BookController@flow') }}',

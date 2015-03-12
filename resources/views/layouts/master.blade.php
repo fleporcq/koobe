@@ -4,9 +4,12 @@
         <meta charset="UTF-8">
         <title>{{$title or $appName}}</title>
         {!! HTML::style('assets/stylesheets/main.css') !!}
+        {!! HTML::style('assets/stylesheets/angular-notify.css') !!}
         @section('styles')
         @show
         {!! HTML::script('assets/javascript/main.js') !!}
+        {!! HTML::script('assets/javascript/angular.js') !!}
+        {!! HTML::script('assets/javascript/ng-notifier.js') !!}
     </head>
     <body {!! isset($bodyTagAttrs) ? HTML::attributes($bodyTagAttrs) : null !!}>
         <nav class="navbar navbar-inverse navbar-fixed-top">
